@@ -10,7 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 // Configure application services
 builder.Services.AddApplicationServices();
 builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddCorsPolicy();
+builder.Services.AddCorsPolicy(builder.Configuration);
 builder.Services.AddSwaggerDocumentation();
 
 var app = builder.Build();
