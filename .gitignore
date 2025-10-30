@@ -1,0 +1,75 @@
+# Frontend - Node.js & Vite
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.idea/
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Backend - .NET
+backend/bin/
+backend/obj/
+backend/tasks.json
+backend/*.user
+backend/.vs/
+backend/*.dll
+backend/*.exe
+backend/*.pdb
+backend/*.cache
+backend/*.suo
+backend/*.swp
+backend/*~
+backend/*.swo
+backend/*.log
+
+# .NET Build Artifacts
+*.dll
+*.exe
+*.pdb
+*.cache
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.swp
+*~
+*.swo
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.dotCover
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Project Management Files (kept local, not tracked in git)
+# PROJECT_NOTES.md
+# ARCHITECTURE.md
