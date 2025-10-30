@@ -1,89 +1,106 @@
 using Microsoft.AspNetCore.Mvc;
-using TaskManager.API.Models;
-using TaskManager.API.Services;
+using TaskManager.API.Application.DTOs;
+using TaskManager.API.Application.Mappers;
+using TaskManager.API.Core.Interfaces;
+using TaskManager.API.Controllers.Base;
 
 namespace TaskManager.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    public class TasksController : ControllerBase
+    public class TasksController : BaseApiController
     {
         private readonly ITaskService _taskService;
+        private readonly IProjectService _projectService;
         private readonly ILogger<TasksController> _logger;
 
-        public TasksController(ITaskService taskService, ILogger<TasksController> logger)
+        public TasksController(
+            ITaskService taskService,
+            IProjectService projectService,
+            ILogger<TasksController> logger)
         {
             _taskService = taskService;
+            _projectService = projectService;
             _logger = logger;
         }
 
-        // GET: api/tasks
-        [HttpGet]
-        public ActionResult<IEnumerable<TaskItem>> GetAll()
+        private async Task<bool> VerifyTaskAccess(Guid taskId, Guid userId)
         {
-            _logger.LogInformation("🔍 GET /api/tasks - Fetching all tasks");
-            var tasks = _taskService.GetAll();
-            _logger.LogInformation("✅ Retrieved {Count} tasks", tasks.Count());
-            return Ok(tasks);
-        }
-
-        // POST: api/tasks
-        [HttpPost]
-        public ActionResult<TaskItem> Create([FromBody] TaskItem task)
-        {
-            _logger.LogInformation("➕ POST /api/tasks - Creating task: {Description}", task.Description);
-            
-            if (string.IsNullOrWhiteSpace(task.Description))
+            var task = await _taskService.GetByIdAsync(taskId);
+            if (task == null)
             {
-                _logger.LogWarning("⚠️ Validation failed: Description is empty");
-                return BadRequest("Description is required");
+                throw new KeyNotFoundException("Task not found");
             }
 
-            var createdTask = _taskService.Create(task);
-            _logger.LogInformation("✅ Task created with ID: {Id}", createdTask.Id);
-            return Ok(createdTask);
+            var project = await _projectService.GetByIdAsync(task.ProjectId);
+            if (project == null || project.UserId != userId)
+            {
+                _logger.LogWarning("⚠️ User {UserId} attempted to access task {TaskId} in project {ProjectId}",
+                    userId, taskId, task.ProjectId);
+                throw new UnauthorizedAccessException("You don't have permission to access this task");
+            }
+
+            return true;
         }
 
-        // PUT: api/tasks/{id}
         [HttpPut("{id}")]
-        public ActionResult<TaskItem> Update(Guid id, [FromBody] TaskItem task)
+        public async Task<ActionResult<TaskDto>> UpdateTask(Guid id, [FromBody] UpdateTaskRequest request)
         {
-            _logger.LogInformation("📝 PUT /api/tasks/{Id} - Updating task", id);
-            _logger.LogInformation("   Description: {Description}, IsCompleted: {IsCompleted}", 
-                task.Description, task.IsCompleted);
-            
-            if (string.IsNullOrWhiteSpace(task.Description))
+            try
             {
-                _logger.LogWarning("⚠️ Validation failed: Description is empty");
-                return BadRequest("Description is required");
-            }
+                var userId = GetUserId();
+                _logger.LogInformation("📝 Updating task {TaskId} for user: {UserId}", id, userId);
 
-            var updatedTask = _taskService.Update(id, task);
-            if (updatedTask == null)
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                await VerifyTaskAccess(id, userId);
+
+                var existingTask = await _taskService.GetByIdAsync(id);
+                    if (existingTask == null)
+                    {
+                        throw new KeyNotFoundException("Task not found");
+                    }
+
+                    existingTask.UpdateEntity(request);
+
+                var updatedTask = await _taskService.UpdateAsync(id, existingTask);
+                if (updatedTask == null)
+                {
+                    throw new KeyNotFoundException("Task not found");
+                }
+
+                return Ok(updatedTask.ToDto());
+            }
+            catch (Exception ex)
             {
-                _logger.LogWarning("❌ Task not found: {Id}", id);
-                return NotFound();
+                return HandleException(ex, _logger, "updating the task");
             }
-
-            _logger.LogInformation("✅ Task updated successfully");
-            return Ok(updatedTask);
         }
 
-        // DELETE: api/tasks/{id}
         [HttpDelete("{id}")]
-        public ActionResult Delete(Guid id)
+        public async Task<IActionResult> DeleteTask(Guid id)
         {
-            _logger.LogInformation("🗑️ DELETE /api/tasks/{Id}", id);
-            
-            var success = _taskService.Delete(id);
-            if (!success)
+            try
             {
-                _logger.LogWarning("❌ Task not found: {Id}", id);
-                return NotFound();
-            }
+                var userId = GetUserId();
+                _logger.LogInformation("🗑️ Deleting task {TaskId} for user: {UserId}", id, userId);
 
-            _logger.LogInformation("✅ Task deleted successfully");
-            return NoContent();
+                await VerifyTaskAccess(id, userId);
+
+                var deleted = await _taskService.DeleteAsync(id);
+                if (!deleted)
+                {
+                    throw new KeyNotFoundException("Task not found");
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, _logger, "deleting the task");
+            }
         }
     }
 }
