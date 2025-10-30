@@ -24,7 +24,7 @@
 | **Region** | Select closest to your users |
 | **Branch** | `MiniProjectManager` |
 | **Root Directory** | `Task_Manager` |
-| **Runtime** | `.NET` |
+| **Runtime** | `Shell` (NOT .NET - we'll install it manually) |
 
 ### Build & Deploy
 | Setting | Command |
@@ -68,10 +68,12 @@ AllowedOrigins__1=https://your-frontend-app.vercel.app
 1. Click **"Create Web Service"**
 2. Render will automatically:
    - Clone your repository
-   - Run `build.sh` (restore & publish)
+   - Run `build.sh` (install .NET 9, restore & publish)
    - Run `start.sh` (start the API)
-3. Wait for deployment to complete (~2-5 minutes)
+3. Wait for deployment to complete (~5-10 minutes for first build due to .NET installation)
 4. Your API will be live at: `https://task-manager-api.onrender.com`
+
+**Note:** First build takes longer as it downloads and installs .NET 9 SDK. Subsequent builds will be faster.
 
 ---
 
