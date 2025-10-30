@@ -1,0 +1,14 @@
+# Netlify build configuration
+
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# Environment variables will be set in Netlify dashboard
+# VITE_API_URL = "https://your-backend.onrender.com/api"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
