@@ -2,6 +2,10 @@ import type { Project, Task } from '../types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
+// Debug log - remove after deployment works
+console.log('API_BASE_URL:', API_BASE_URL)
+console.log('VITE_API_URL env:', import.meta.env.VITE_API_URL)
+
 export async function fetchProject(projectId: string, token: string): Promise<Project> {
   const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
     headers: { 'Authorization': `Bearer ${token}` },
