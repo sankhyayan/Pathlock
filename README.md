@@ -3,8 +3,8 @@
 A full-stack task management application with smart scheduling capabilities.
 
 ## 🚀 Live Demo
+[https://miniprojectmanagerfrontend.netlify.app](https://miniprojectmanagerfrontend.netlify.app)
 
-**Frontend:** [https://miniprojectmanagerfrontend.netlify.app](https://miniprojectmanagerfrontend.netlify.app)
 
 **Backend API:** [https://miniprojectmanagerbackend.onrender.com](https://miniprojectmanagerbackend.onrender.com)
 
